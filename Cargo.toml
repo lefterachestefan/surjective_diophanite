@@ -10,6 +10,6 @@ rug = "1.28.0"
 
 [profile.release]
 lto = true
-panic = "abort"
+# panic = "abort"
 codegen-units = 1
 strip = true
