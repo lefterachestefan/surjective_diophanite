@@ -6,13 +6,11 @@ use std::time::Instant;
 const CHECK_UP_TO: usize = 3000;
 
 fn next_m(prev: &mut [Integer; CHECK_UP_TO + 1], m: usize) {
-    let mut last: Integer = 0.into();
+    let mut last: Integer = Integer::from(0);
     for n in 1..=m {
-        unsafe {
-            let new_last = prev.get_unchecked(n).clone();
-            *prev.get_unchecked_mut(n) = n * (prev.get_unchecked(n).clone() + last);
-            last = new_last;
-        }
+        let new_last = unsafe { prev.get_unchecked(n).clone() };
+        unsafe { *prev.get_unchecked_mut(n) = n * (prev.get_unchecked(n).clone() + last) };
+        last = new_last;
     }
 }
 
