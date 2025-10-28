@@ -3,28 +3,30 @@ use rayon::prelude::*;
 use rug::{Complete, Integer};
 use std::time::Instant;
 
-const CHECK_UP_TO: usize = 3000;
+const CHECK_UP_TO: usize = 10000;
+const CAP: usize = 20032;
 
+#[inline(always)]
 fn next_m(prev: &mut [Integer; CHECK_UP_TO + 1], m: usize) {
-    let mut last: Integer = 0.into();
+    let mut last: Integer = Integer::with_capacity(CAP);
     for n in 1..=m {
         unsafe {
-            let new_last = prev.get_unchecked(n).clone();
-            *prev.get_unchecked_mut(n) = n * (prev.get_unchecked(n).clone() + last);
+            let new_last = std::mem::take(prev.get_unchecked_mut(n));
+            *prev.get_unchecked_mut(n) = n * (last + &new_last);
+            // dbg!(&new_last.capacity());
             last = new_last;
         }
     }
-    // dbg!(&prev);
 }
 
 fn main() {
     let start_time = Instant::now();
     let mut last_check_time = start_time;
-    let mut surjective: [Integer; CHECK_UP_TO + 1] = std::array::from_fn(|_| Integer::from(0));
+    let mut surjective: [Integer; CHECK_UP_TO + 1] =
+        std::array::from_fn(|_| Integer::with_capacity(CAP));
     surjective[1] = Integer::from(1);
     for m in 2..=CHECK_UP_TO {
         next_m(&mut surjective, m);
-
         let change_point = binary_search((1, ()), (m - 1, ()), |i| unsafe {
             if surjective.get_unchecked(i) <= surjective.get_unchecked(i + 1) {
                 Direction::Low(())
@@ -38,34 +40,25 @@ fn main() {
             let x = z - 1;
             let right_side = surjective.get_unchecked(z);
             let x_side = surjective.get_unchecked(x);
-            let st = binary_search((1, ()), (change_point, ()), |i| {
-                if &(x_side + surjective.get_unchecked(i)).complete() <= right_side {
-                    Direction::Low(())
-                } else {
-                    Direction::High(())
-                }
-            })
-            .0
-            .0;
-            if &(x_side + surjective.get_unchecked(st)).complete() == right_side {
-                return Some((x, st, z));
-            }
-            let st = binary_search((change_point + 1, ()), (m, ()), |i| {
-                if &(x_side + surjective.get_unchecked(i)).complete() >= right_side {
-                    Direction::Low(())
-                } else {
-                    Direction::High(())
-                }
-            })
-            .0
-            .0;
-            if &(x_side + surjective.get_unchecked(st)).complete() == right_side {
-                return Some((x, st, z));
+            let (left_result, right_result) = rayon::join(
+                || {
+                    surjective[1..=change_point]
+                        .binary_search_by(|i| (x_side + i).complete().cmp(right_side))
+                        .is_ok()
+                },
+                || {
+                    surjective[change_point + 1..=m]
+                        .binary_search_by(|i| (x_side + i).complete().cmp(right_side).reverse())
+                        .is_ok()
+                },
+            );
+            if left_result || right_result {
+                return Some(());
             }
             None
         });
-        if let Some(sol) = solution {
-            println!("FOUND FOR {m}: {sol:?}");
+        if solution.is_some() {
+            println!("FOUND FOR {m}");
         }
         if last_check_time.elapsed().as_secs_f64() >= 10.0 {
             last_check_time = Instant::now();
