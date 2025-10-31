@@ -5,8 +5,10 @@ edition = "2024"
 
 [dependencies]
 binary-search = "0.1.3"
+dashu = "0.4.2"
+dashu-int = "0.4.1"
+lazy_static = "1.5.0"
 rayon = "1.11.0"
-rug = "1.28.0"
 
 [profile.release]
 lto = true
