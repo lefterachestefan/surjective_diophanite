@@ -103,11 +103,28 @@ fn main() {
 mod test {
     use super::*;
     #[test]
+    fn check_surjective_line_dp() {
+        let mut line = get_start_line();
+        for i in 2..=6 {
+            next_m(&mut line, i);
+        }
+        assert_eq!(line[1..=6], [1, 62, 540, 1560, 1800, 720]);
+    }
+    #[test]
+    fn does_line_fit() {
+        assert_eq!(
+            get_start_line().len(),
+            CHECK_UP_TO + 1,
+            "invalid SurjectiveLine length"
+        );
+    }
+    #[test]
     fn gen_lines() {
         let mut line = get_start_line();
         for i in 2..=CHECK_UP_TO {
             next_m(&mut line, i);
         }
-        println!("{}", size_of_val(&line));
+        assert_ne!(line[CHECK_UP_TO], 0, "failed to init every SurjectiveLine");
+        assert!(line[CHECK_UP_TO] < BIG_PRIME, "failed to modulo");
     }
 }
