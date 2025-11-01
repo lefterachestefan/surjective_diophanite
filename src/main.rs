@@ -1,4 +1,3 @@
-#![feature(maybe_uninit_array_assume_init)]
 use binary_search::{Direction, binary_search};
 use rayon::prelude::*;
 use std::{mem::MaybeUninit, time::Instant};
@@ -24,7 +23,12 @@ fn next_m(prev: &mut SurjectiveLine, m: usize) {
         .for_each(|(i, v)| unsafe {
             v.write(*prev.get_unchecked(i * chunk_size));
         });
-    let last_clones = unsafe { MaybeUninit::array_assume_init(last_clones) };
+    // let last_clones = unsafe { MaybeUninit::array_assume_init(last_clones) };
+    let last_clones = unsafe {
+        std::mem::transmute::<[MaybeUninit<u64>; THREADS + MIN_WINDOW], [u64; THREADS + MIN_WINDOW]>(
+            last_clones,
+        )
+    };
 
     unsafe { prev.get_unchecked_mut(1..=m) }
         .chunks_mut(chunk_size)
