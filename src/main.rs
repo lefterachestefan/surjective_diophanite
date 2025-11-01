@@ -1,34 +1,54 @@
+#![feature(maybe_uninit_array_assume_init)]
 use binary_search::{Direction, binary_search};
 use rayon::prelude::*;
-use std::time::Instant;
+use std::{mem::MaybeUninit, time::Instant};
 
 const CHECK_UP_TO: usize = 3000;
 type SurjectiveLine = [u64; CHECK_UP_TO + 1];
 
-const BIG_PRIME: u64 = 12345678910987654321u64;
+// better = bigger precision, but might not fit in u64
+// const BIG_PRIME: u64 = 12345678910987654321u64;
+const BIG_PRIME: u64 = 100000000003;
 
 #[inline(always)]
 fn next_m(prev: &mut SurjectiveLine, m: usize) {
-    let mut last = 1u64;
-    for n in 2..=m {
-        unsafe {
-            let new = n as u64 * (last + prev.get_unchecked(n)) % BIG_PRIME;
-            last = std::mem::replace(prev.get_unchecked_mut(n), new);
-        }
-    }
+    const MIN_WINDOW: usize = 32;
+    const THREADS: usize = 512;
+    let chunk_size = (m / THREADS).max(MIN_WINDOW);
+    let mut last_clones: [MaybeUninit<u64>; THREADS + MIN_WINDOW] =
+        unsafe { MaybeUninit::uninit().assume_init() };
+
+    unsafe { last_clones.get_unchecked_mut(0..(m / chunk_size + 1)) }
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, v)| unsafe {
+            v.write(*prev.get_unchecked(i * chunk_size));
+        });
+    let last_clones = unsafe { MaybeUninit::array_assume_init(last_clones) };
+
+    unsafe { prev.get_unchecked_mut(1..=m) }
+        .chunks_mut(chunk_size)
+        .enumerate()
+        .for_each(|(i, slice)| {
+            let mut last: u64 = unsafe { *last_clones.get_unchecked(i) };
+            let n = i * chunk_size + 1;
+            for (i, v) in slice.iter_mut().enumerate() {
+                last = std::mem::replace(v, (((n + i) as u64) * (last + *v)) % BIG_PRIME)
+            }
+        });
 }
 
 #[inline(always)]
-fn get_start_line() -> SurjectiveLine {
+const fn get_start_line() -> SurjectiveLine {
     let mut surjective: [u64; CHECK_UP_TO + 1] = const { [0u64; CHECK_UP_TO + 1] };
-    unsafe { *surjective.get_unchecked_mut(1) = 1 };
+    surjective[1] = 1;
     surjective
 }
 
 fn main() {
     let start_time = Instant::now();
     let mut last_check_time = start_time;
-    let mut surjective = get_start_line();
+    let mut surjective = const { get_start_line() };
     for m in 2..=CHECK_UP_TO {
         next_m(&mut surjective, m);
         let change_point = binary_search((1, ()), (m - 1, ()), |i| unsafe {
@@ -70,7 +90,7 @@ fn main() {
         }
     }
     println!(
-        "Program checked up to {CHECK_UP_TO} in {:.2} seconds.",
+        "Program checked up to {CHECK_UP_TO} in {:.3} seconds.",
         start_time.elapsed().as_secs_f64()
     );
 }
