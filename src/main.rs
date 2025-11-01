@@ -45,6 +45,13 @@ const fn get_start_line() -> SurjectiveLine {
     surjective
 }
 
+#[inline(always)]
+fn get_start_line() -> SurjectiveLine {
+    let mut surjective: [u64; CHECK_UP_TO + 1] = const { [0u64; CHECK_UP_TO + 1] };
+    unsafe { *surjective.get_unchecked_mut(1) = 1 };
+    surjective
+}
+
 fn main() {
     let start_time = Instant::now();
     let mut last_check_time = start_time;
