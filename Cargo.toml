@@ -1,7 +1,10 @@
 [package]
-name = "mate-conjecture"
+name = "surjective_diophanite"
+authors = ["Lefterache Ștefan <lefterache.stefan.8@gmail.com>"]
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 binary-search = "0.1.3"
@@ -12,7 +15,6 @@ rayon = "1.11.0"
 
 [profile.release]
 lto = true
-# panic = "abort"
 codegen-units = 1
 strip = true
 opt-level = 3

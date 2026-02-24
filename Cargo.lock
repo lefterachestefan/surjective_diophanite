@@ -130,17 +130,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
-name = "mate-conjecture"
-version = "0.1.0"
-dependencies = [
- "binary-search",
- "dashu",
- "dashu-int",
- "lazy_static",
- "rayon",
-]
-
-[[package]]
 name = "num-modular"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -210,6 +199,17 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "surjective_diophanite"
+version = "0.1.0"
+dependencies = [
+ "binary-search",
+ "dashu",
+ "dashu-int",
+ "lazy_static",
+ "rayon",
+]
 
 [[package]]
 name = "unicode-ident"

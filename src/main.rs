@@ -1,3 +1,10 @@
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::nursery)]
+#![allow(clippy::large_stack_arrays)]
+#![allow(clippy::inline_always)]
+#![allow(clippy::cast_precision_loss)]
+
 use binary_search::{Direction, binary_search};
 use rayon::prelude::*;
 use std::{mem::MaybeUninit, time::Instant};
@@ -7,7 +14,7 @@ type SurjectiveLine = [u64; CHECK_UP_TO + 1];
 
 // better = bigger precision, but might not fit in u64
 // const BIG_PRIME: u64 = 12345678910987654321u64;
-const BIG_PRIME: u64 = 100000000003;
+const BIG_PRIME: u64 = 100_000_000_003;
 
 #[inline(always)]
 fn next_m(prev: &mut SurjectiveLine, m: usize) {
@@ -37,7 +44,7 @@ fn next_m(prev: &mut SurjectiveLine, m: usize) {
             let mut last: u64 = unsafe { *last_clones.get_unchecked(i) };
             let n = i * chunk_size + 1;
             for (i, v) in slice.iter_mut().enumerate() {
-                last = std::mem::replace(v, (((n + i) as u64) * (last + *v)) % BIG_PRIME)
+                last = std::mem::replace(v, (((n + i) as u64) * (last + *v)) % BIG_PRIME);
             }
         });
 }
@@ -92,7 +99,7 @@ fn main() {
         }
         if last_check_time.elapsed().as_secs_f64() >= 10.0 {
             last_check_time = Instant::now();
-            println!("{:.2}%", (m * 100) as f64 / CHECK_UP_TO as f64)
+            println!("{:.2}%", (m * 100) as f64 / CHECK_UP_TO as f64);
         }
     }
     println!(
