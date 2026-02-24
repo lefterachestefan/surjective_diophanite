@@ -6,7 +6,7 @@ This project implements a highly parallelized, brute-force computational check f
 
 Specifically, it is currently unknown if there exists an integer $`m \not\in \{ 1,2,5,7 \}`$ such that:
 
-$$`x^{\{ m \}} + y^{\{ m \}} = z^{\{ m \}}`$$
+$`x^{\{ m \}} + y^{\{ m \}} = z^{\{ m \}}`$
 
 Where $`k^{\{ m \}}`$ denotes the number of surjective functions from a set of size $m$ to a set of size $k$.
 
