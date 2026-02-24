@@ -1,4 +1,4 @@
-use binary_search::{binary_search, Direction};
+use binary_search::{Direction, binary_search};
 use rayon::prelude::*;
 use std::{mem::MaybeUninit, time::Instant};
 
@@ -63,7 +63,7 @@ fn main() {
             }
         })
         .0
-         .0 + 1;
+        .0 + 1;
         let solution = (2..=m).into_par_iter().find_map_any(|z| unsafe {
             let x = z - 1;
             let right_side = surjective.get_unchecked(z);
